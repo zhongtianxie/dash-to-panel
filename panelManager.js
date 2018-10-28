@@ -53,10 +53,13 @@ var dtpPanelManager = new Lang.Class({
     },
 
     enable: function(reset) {
-        let dtpPrimaryMonitor = Main.layoutManager.monitors[(Main.layoutManager.primaryIndex + this._dtpSettings.get_int('primary-monitor')) % Main.layoutManager.monitors.length];
+        this.dtpPrimaryMonitor = Main.layoutManager.monitors[(Main.layoutManager.primaryIndex + this._dtpSettings.get_int('primary-monitor')) % Main.layoutManager.monitors.length];
         this.proximityManager = new Proximity.ProximityManager();
 
-        this.primaryPanel = new Panel.dtpPanelWrapper(this, dtpPrimaryMonitor, Main.panel, Main.layoutManager.panelBox);
+        this.primaryPanel = this._dtpSettings.get_boolean('stockgs-keep-top-panel') ? 
+                            this._createSecondaryPanel(this.dtpPrimaryMonitor) :
+                            new Panel.dtpPanelWrapper(this, this.dtpPrimaryMonitor, Main.panel, Main.layoutManager.panelBox);
+        
         this.primaryPanel.enable();
         this.allPanels = [ this.primaryPanel ];
         
@@ -64,19 +67,12 @@ var dtpPanelManager = new Lang.Class({
 
         if (this._dtpSettings.get_boolean('multi-monitors')) {
             Main.layoutManager.monitors.forEach(monitor => {
-                if (monitor == dtpPrimaryMonitor)
+                if (monitor == this.dtpPrimaryMonitor)
                     return;
 
-                let panelBox = new St.BoxLayout({ name: 'dashtopanelSecondaryPanelBox', vertical: true });
-                Main.layoutManager.addChrome(panelBox, { affectsStruts: true, trackFullscreen: true });
-                Main.uiGroup.set_child_below_sibling(panelBox, Main.layoutManager.panelBox);
-
-                let panel = new Panel.dtpSecondaryPanel(this._dtpSettings, monitor);
-                panelBox.add(panel.actor);
+                let panelWrapper = this._createSecondaryPanel(monitor);
                 
-                let panelWrapper = new Panel.dtpPanelWrapper(this, monitor, panel, panelBox, true);
                 panelWrapper.enable();
-
                 this.allPanels.push(panelWrapper);
             });
         }
@@ -112,7 +108,7 @@ var dtpPanelManager = new Lang.Class({
         this._oldUpdateWorkspacesViews = Main.overview.viewSelector._workspacesDisplay._updateWorkspacesViews;
         Main.overview.viewSelector._workspacesDisplay._updateWorkspacesViews = Lang.bind(Main.overview.viewSelector._workspacesDisplay, this._newUpdateWorkspacesViews);
 
-        this.setFocusedMonitor(dtpPrimaryMonitor);
+        this.setFocusedMonitor(this.dtpPrimaryMonitor);
 
         // Since Gnome 3.8 dragging an app without having opened the overview before cause the attemp to
         //animate a null target since some variables are not initialized when the viewSelector is created
@@ -130,8 +126,13 @@ var dtpPanelManager = new Lang.Class({
                     'changed::multi-monitors',
                     'changed::isolate-monitors',
                     'changed::taskbar-position',
-                    'changed::panel-position'
+                    'changed::panel-position',
                 ],
+                () => this._reset(true)
+            ],
+            [
+                this._dtpSettings,
+                'changed::stockgs-keep-top-panel',
                 () => this._reset()
             ],
             [
@@ -142,7 +143,7 @@ var dtpPanelManager = new Lang.Class({
             [
                 Utils.DisplayWrapper.getMonitorManager(),
                 'monitors-changed', 
-                () => this._reset()
+                () => this._reset(true)
             ]
         );
 
@@ -208,9 +209,21 @@ var dtpPanelManager = new Lang.Class({
         }
     },
 
-    _reset: function() {
-        this.disable(true);
-        this.enable(true);
+    _createSecondaryPanel: function(monitor) {
+        let panelBox = new St.BoxLayout({ name: 'dashtopanelSecondaryPanelBox', vertical: true });
+
+        Main.layoutManager.addChrome(panelBox, { affectsStruts: true, trackFullscreen: true });
+        Main.uiGroup.set_child_below_sibling(panelBox, Main.layoutManager.panelBox);
+
+        let panel = new Panel.dtpSecondaryPanel(this._dtpSettings, monitor);
+        panelBox.add(panel.actor);
+        
+        return new Panel.dtpPanelWrapper(this, monitor, panel, panelBox, true);
+    },
+
+    _reset: function(partial) {
+        this.disable(partial);
+        this.enable(partial);
     },
 
     _adjustBoxPointer: function(boxPointer, monitor, arrowSide) {

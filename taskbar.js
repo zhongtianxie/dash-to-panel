@@ -768,8 +768,9 @@ var taskbar = new Lang.Class({
             return;
         }
         
+        let isOnDtpPrimaryMonitor = this.panelWrapper.panelManager.dtpPrimaryMonitor == this.panelWrapper.monitor;
         let showFavorites = this._dtpSettings.get_boolean('show-favorites') && 
-                            (!this.panelWrapper.isSecondary || this._dtpSettings.get_boolean('show-favorites-all-monitors'));
+                            (isOnDtpPrimaryMonitor || this._dtpSettings.get_boolean('show-favorites-all-monitors'));
         //get the currently displayed appIcons
         let currentAppIcons = this._getTaskbarIcons();
         //get the user's favorite apps
@@ -850,7 +851,7 @@ var taskbar = new Lang.Class({
         this._updateAppIconsGeometry();
 
         // This will update the size, and the corresponding number for each icon on the primary panel
-        if (!this.panelWrapper.isSecondary) {
+        if (isOnDtpPrimaryMonitor) {
             this._updateNumberOverlay();
         }
 

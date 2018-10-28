@@ -98,7 +98,7 @@ function _enable() {
 
     // Pretend I'm the dash: meant to make appgrd swarm animation come from the
     // right position of the appShowButton.
-    oldDash  = Main.overview._dash;
+    oldDash = Main.overview._dash;
     Main.overview._dash = panelManager.primaryPanel.taskbar;
 }
 
@@ -108,7 +108,7 @@ function disable(reset) {
     settings.run_dispose();
 
     settings = null;
-    oldDash=null;
+    oldDash = null;
     panelManager = null;
     
     Main.wm.removeKeybinding('open-application-menu');
