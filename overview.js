@@ -53,14 +53,14 @@ var dtpOverview = new Lang.Class({
         this._isolation = this._optionalWorkspaceIsolation();
         this._optionalHotKeys();
         this._optionalNumberOverlay();
-        this.toggleDash();
-        this._stockgsKeepDashId = this._dtpSettings.connect('changed::stockgs-keep-dash', () => this.toggleDash());
+        this._toggleDash();
+        this._stockgsKeepDashId = this._dtpSettings.connect('changed::stockgs-keep-dash', () => this._toggleDash());
     },
 
     disable: function () {
         this._dtpSettings.disconnect(this._stockgsKeepDashId);
         
-        this.toggleDash(true);
+        this._toggleDash(true);
 
         // reset stored icon size  to the default dash
         Main.overview.dashIconSize = Main.overview._controls.dash.iconSize;
@@ -72,7 +72,7 @@ var dtpOverview = new Lang.Class({
         this._isolation.disable.apply(this);
     },
 
-    toggleDash: function(visible) {
+    _toggleDash: function(visible) {
         // To hide the dash, set its width to 1, so it's almost not taken into account by code
         // calculaing the reserved space in the overview. The reason to keep it at 1 is
         // to allow its visibility change to trigger an allocaion of the appGrid which

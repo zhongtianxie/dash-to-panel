@@ -58,7 +58,7 @@ function enable() {
 
 function _enable() {
     let ubuntuDock = ExtensionUtils.extensions[UBUNTU_DOCK_UUID];
-    
+
     if (ubuntuDock && ubuntuDock.stateObj && ubuntuDock.stateObj.dockManager) {
         // Disable Ubuntu Dock
         St.ThemeContext.get_for_stage(global.stage).get_theme().unload_stylesheet(ubuntuDock.stylesheet);
@@ -71,9 +71,6 @@ function _enable() {
         if (panelManager) {
             disable(true);
         }
-
-        // ubuntu dock shows the dash when disabled, hide it again if necessary
-        panelManager.overview.toggleDash();
     }
 
     if (panelManager) return; //already initialized
