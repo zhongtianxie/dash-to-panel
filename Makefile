@@ -6,11 +6,7 @@ EXTRA_MODULES = appIcons.js convenience.js panel.js panelManager.js proximity.js
 EXTRA_IMAGES = highlight_stacked_bg.svg
 TOLOCALIZE =  prefs.js appIcons.js
 MSGSRC = $(wildcard po/*.po)
-ifeq ($(strip $(DESTDIR)),)
-	INSTALLBASE = $(HOME)/.local/share/gnome-shell/extensions
-else
-	INSTALLBASE = $(DESTDIR)/usr/share/gnome-shell/extensions
-endif
+INSTALLBASE = $(DESTDIR)/usr/share/gnome-shell/extensions
 INSTALLNAME = dash-to-panel@jderose9.github.com
 
 # The command line passed variable VERSION is used to set the version string
